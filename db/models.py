@@ -17,8 +17,7 @@ class Base(DeclarativeBase):
 
 class User(Base):
     __tablename__ = "user_table"
-    # TODO - Описать модель таблицы пользователей
-    user_id = Column(Integer, primary_key=True)
+    userid = Column(Integer, primary_key=True)
     username = Column(VARCHAR(255), unique=False, nullable=False)
     tutorcode = Column(VARCHAR(6), unique=False)
     subscribe = Column(VARCHAR(6), unique=False)
