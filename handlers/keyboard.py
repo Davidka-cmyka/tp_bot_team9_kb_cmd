@@ -7,3 +7,8 @@ main_keyboard_list = [
 
 main_keyboard = ReplyKeyboardMarkup(keyboard=main_keyboard_list, resize_keyboard=True, one_time_keyboard=True)
 
+start_keyboard_list = [
+        [KeyboardButton(text="Преподаватель"), KeyboardButton(text="Слушатель")]
+]
+
+start_keyboard = ReplyKeyboardMarkup(keyboard=start_keyboard_list, resize_keyboard=True,one_time_keyboard=True)
