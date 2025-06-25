@@ -1,17 +1,48 @@
-from aiogram.types import CallbackQuery
+import logging
+import string
+from random import choices
+from aiogram import Router, types
+from sqlalchemy import insert
+from db import User, async_session
+from .callbacks import callback_message
 
+router = Router()
 
-# TODO - напишите callback-функцию, которая будет отвечать при нажатие на кнопку в тг-боте
+@router.callback_query(lambda c: c.data == "button_tutor")
+async def callback_start_tutor(callback: types.CallbackQuery):
+    logging.info(f"Пользователь {callback.from_user.id} выбрал преподавателя")
+    async with async_session() as session:
+        new_user = {
+            "user_id": callback.from_user.id,
+            "user_name": callback.from_user.username or "Unknown",
+            "tutorcode": "".join(choices(string.ascii_letters + string.digits, k=6))
+        }
+        await session.execute(insert(User).values(**new_user))
+        await session.commit()
+    await callback.message.answer("Вы зарегистрированы как преподаватель! Проверьте статус: /status")
+    await callback.answer()
 
-# Callback_query_handler - это функция, которая позволяет обрабатывать коллбек-запросы от пользователей.
-# Коллбэк-запрос - это запрос, который отправляется боту, когда пользователь нажимает кнопку в его чате.
+@router.callback_query(lambda c: c.data == "button_student")
+async def callback_start_student(callback: types.CallbackQuery):
+    logging.info(f"Пользователь {callback.from_user.id} выбрал слушателя")
+    await callback.message.answer("Введите код преподавателя (в формате tutorcode-CODE):")
 
-# CallbackQuery https://docs.aiogram.dev/en/v3.15.0/api/types/callback_query.html
-# Пример использования callback https://ru.stackoverflow.com/questions/1565436/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%87%D0%B8%D0%BA-%D0%BA%D0%BE%D0%BB%D0%B1%D0%B5%D0%BA%D0%BE%D0%B2-%D0%B2-aiogram-3#:~:text=%D0%94%D0%BE%D0%B1%D0%B0%D0%B2%D0%B8%D1%82%D1%8C%20%D0%BA%D0%BE%D0%BC%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%80%D0%B8%D0%B9-,1%20%D0%BE%D1%82%D0%B2%D0%B5%D1%82,-%D0%A1%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0%3A
-# Пример использования инлайн-клавиатуры и CallBack https://habr.com/ru/articles/820877/
-# Пример обработчика для callback с F.data для aiogram3 https://ru.stackoverflow.com/questions/1565436/%D0%9A%D0%B0%D0%BA-%D1%81%D0%B4%D0%B5%D0%BB%D0%B0%D1%82%D1%8C-%D0%BE%D0%B1%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%87%D0%B8%D0%BA-%D0%BA%D0%BE%D0%BB%D0%B1%D0%B5%D0%BA%D0%BE%D0%B2-%D0%B2-aiogram-3#:~:text=%D0%94%D0%BE%D0%B1%D0%B0%D0%B2%D0%B8%D1%82%D1%8C%20%D0%BA%D0%BE%D0%BC%D0%BC%D0%B5%D0%BD%D1%82%D0%B0%D1%80%D0%B8%D0%B9-,1%20%D0%BE%D1%82%D0%B2%D0%B5%D1%82,-%D0%A1%D0%BE%D1%80%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%BA%D0%B0%3A
+async def start_student(message):
+        """Регистрация слушателя"""
+        async with async_session() as session:
+            new_user = {
+                "user_ id": message.fron_user.id,
+                "username": message.from_user.usernane,
+                "subscribe": str(message.text).split("-")[1]
+            }
 
+            insert_query = insert(User). values(**new_user)
+            await session.execute(insert_query)
+            await session.commit()
+            await message.answer("Пользователь добавлен(")
+            logging. info(f"Пользователь{message.from_user.username} добавлен в базу данных с рольм слушатель!")
 
-async def callback_message():
-    '''Ответ на кнопку'''
-    pass
+@router.callback_query(lambda c: c.data == "button_pressed")
+async def handle_button_press(callback_query: types.CallbackQuery):
+    await callback_query.answer()  # Подтверждаем нажатие
+    await callback_query.message.edit_text("Вы нажали кнопку!")

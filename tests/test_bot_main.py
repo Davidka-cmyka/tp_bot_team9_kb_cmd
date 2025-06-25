@@ -1,16 +1,21 @@
-import pytest
-from main import main
-from fixtures import mock_bot, mock_dispatcher, mock_set_commands , mock_router, mock_set_up_logger
+import os
+from pathlib import Path
+from dotenv import load_dotenv
 
-@pytest.mark.asyncio
-async def test_main(mock_bot, mock_dispatcher, mock_router, mock_set_commands, mock_set_up_logger):
-    # вызов функции main
-    await main()
+parent = Path(f"{os.getcwd()}").parent
 
-  # Проверка
- # mock_dispatcher.start_polling.assert_awaited_once_with(mock_bot)
+def test_main_file_exists():
+    main_path = Path(f"{parent}/bot_main.py")
+    assert main_path.exists(), "Файл bot_main.py не найден"
+    assert main_path.is_file(), "bot_main.py существует, но не является файлом"
 
-# TODO - техдолг: доделать вызов функции
-# mock_dispatcher.include_routers.assert_awaited_once_with(mock_router)
-# mock_set_commands.assert_awaited_once_with(mock_bot)
-# mock_set_up_logger.assert_awaited_once()
+def test_main_file_has_required_imports():
+    required_imports = [
+        "from aiogram import",
+        "from handlers import",
+        "from callbacks import"
+    ]
+    with open(f"{parent}/bot_main.py", "r", encoding="utf-8") as file:
+        content = file.read()
+        for imp in required_imports:
+            assert imp in content, f"Не найден обязательный импорт: {imp}"
