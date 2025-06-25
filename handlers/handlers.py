@@ -10,7 +10,8 @@ __all__ = [
 from aiogram import types, Router, F
 from aiogram.filters import Command
 from .keyboard import main_keyboard   # импорт из клавиатур
-from .callbacks import callback_message  # импорт из коллбека
+
+
 
 router = Router()
 
@@ -25,7 +26,28 @@ async def process_help_command(message: types.Message):
 @router.message(F.text == 'Статус',)
 @router.message(Command("status"))
 async def process_status_command(message: types.Message):
-    await message.answer(f"{message.from_user.id}, {message.from_user.username}")
+     await message.answer(f"{message.from_user.id}, {message.from_user.username}")
+
+@router.message(Command("today"))
+async def process_today_command(message: types.Message):
+    await message.answer(text="Текущие курсы ключевых валют")
+
+@router.message(Command("subscribe"))
+async def process_subscribe_command(message: types.Message):
+    await message.answer(text="Включение ежедневную рассылку")
+
+@router.message(Command("unsubscribe"))
+async def process_unsubscribe_command(message: types.Message):
+    await message.answer(text="Выключение рассылки")
+
+
+
+
+
+
+
+
+
 
 
 # Здесь описывается маршрутизация
